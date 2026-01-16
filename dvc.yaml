@@ -1,0 +1,14 @@
+stages:
+  make_dataset:
+    cmd: python .\src\data\make_dataset.py train.csv
+    deps:
+    - .\data\raw\extracted\train.csv
+    - .\src\data\make_dataset.py
+    params:
+    - make_dataset.random_state
+    - make_dataset.test_size
+    outs:
+    - .\data\interim
+
+
+
