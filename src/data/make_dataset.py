@@ -1,11 +1,13 @@
 import sys
+from pathlib import Path
 import logging
 from yaml import safe_load
 import pandas as pd
-from pathlib import Path
 from sklearn.model_selection import train_test_split
 from logger import create_log_path, CustomLogger
 from sklearn.preprocessing import LabelEncoder
+from text_preprocessing import transform_text, make_features
+
 
 
 log_file_path = create_log_path('make_dataset')
@@ -72,6 +74,12 @@ def read_params(input_file):
         test_size = params_file['make_dataset']['test_size']
         random_state = params_file['make_dataset']['random_state']
         return test_size, random_state
+    
+def transfrom_message(data: pd.DataFrame) -> pd.DataFrame:
+
+    data['transformed_text'] = data['text'].apply(transform_text)
+    return make_features(data)
+
 
 def main():
 
@@ -86,10 +94,11 @@ def main():
     raw_df_path = root_path / 'data' / 'raw' / 'extracted' / input_file_name
     raw_df = load_raw_data(input_path = raw_df_path)
     raw_df = label_encoding(raw_df)
+    transformed_df = transfrom_message(raw_df)
 
     test_size , random_state = read_params('params.yaml')
 
-    train_df, val_df = train_val_split(data = raw_df,
+    train_df, val_df = train_val_split(data = transformed_df,
                                        test_size = test_size,
                                        random_state = random_state)
     
