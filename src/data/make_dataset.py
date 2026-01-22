@@ -5,6 +5,8 @@ import pandas as pd
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from logger import create_log_path, CustomLogger
+from sklearn.preprocessing import LabelEncoder
+
 
 log_file_path = create_log_path('make_dataset')
 
@@ -22,6 +24,12 @@ def load_raw_data(input_path: Path) -> pd.DataFrame:
     return raw_data
     
 
+def label_encoding(data: pd.DataFrame) -> pd.DateOffset:
+
+    le = LabelEncoder()
+    data['target'] = le.fit_transform(data['target'])
+    return data
+
 def train_val_split(data: pd.DataFrame,
                     test_size: float,
                     random_state: int) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -35,6 +43,7 @@ def train_val_split(data: pd.DataFrame,
                              log_level= 'info')
 
     return train_data, val_data
+
 
 def save_data(data: pd.DataFrame, output_path: Path):
     data.to_csv(output_path, index = False)
@@ -76,6 +85,7 @@ def main():
     interim_data_path.mkdir(exist_ok = True)
     raw_df_path = root_path / 'data' / 'raw' / 'extracted' / input_file_name
     raw_df = load_raw_data(input_path = raw_df_path)
+    raw_df = label_encoding(raw_df)
 
     test_size , random_state = read_params('params.yaml')
 
